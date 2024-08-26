@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  createPlugin,
+  createRoutableExtension,
+} from '@backstage/core-plugin-api';
 
-// TODO(Rugvip): This plugin is currently not part of the app element tree,
-//               ideally we have an API for the context menu that permits that.
-export { homePlugin } from '@backstage/plugin-home';
-export { signalsPlugin } from '@backstage/plugin-signals';
-export { aiChatPlugin } from '@backstage/plugin-ai-chat';
+import { rootRouteRef } from './routes';
+
+export const aiChatPlugin = createPlugin({
+  id: 'ai-chat',
+  routes: {
+    root: rootRouteRef,
+  },
+});
+
+export const AiChatPage = aiChatPlugin.provide(
+  createRoutableExtension({
+    name: 'AiChatPage',
+    component: () =>
+      import('./AIChat').then(
+        m => m.AIChat as (props: any) => React.ReactElement,
+      ),
+    mountPoint: rootRouteRef,
+  }),
+);
