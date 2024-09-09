@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import React from 'react';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -20,14 +21,13 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import SaveIcon from '@material-ui/icons/Save';
-import React from 'react';
 import { useDirectoryEditor } from './DirectoryEditorContext';
 import { FileBrowser } from '../../components/FileBrowser';
 import { useTranslationRef } from '@backstage/core-plugin-api/alpha';
 import { scaffolderTranslationRef } from '../../translation';
 import { AIChatComponent } from '@backstage/plugin-ai-chat';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
   button: {
     padding: theme.spacing(1),
   },
@@ -56,6 +56,16 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'row',
     height: 'calc(100% - 48px)',
+    position: 'relative',
+  },
+  fileBrowser: {
+    flex: 1,
+  },
+  chatComponent: {
+    position: 'absolute',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+    zIndex: 1000,
   },
 }));
 
@@ -63,24 +73,30 @@ const useStyles = makeStyles(theme => ({
 export function TemplateEditorBrowser(props: { onClose?: () => void }) {
   const classes = useStyles();
   const directoryEditor = useDirectoryEditor();
-  const changedFiles = directoryEditor.files.filter(file => file.dirty);
   const { t } = useTranslationRef(scaffolderTranslationRef);
 
+  const changedFiles = directoryEditor.files.filter(file => file.dirty);
+  const hasChangedFiles = changedFiles.length > 0;
+  const canSave = directoryEditor.files.some(file => file.dirty);
+
+  const handleSave = () => directoryEditor.save();
+  const handleReload = () => directoryEditor.reload();
+
   const handleClose = () => {
-    if (!props.onClose) {
-      return;
-    }
-    if (changedFiles.length > 0) {
+    if (!props.onClose) return;
+
+    if (hasChangedFiles) {
       // eslint-disable-next-line no-alert
       const accepted = window.confirm(
         t('templateEditorPage.templateEditorBrowser.closeConfirmMessage'),
       );
-      if (!accepted) {
-        return;
-      }
+      if (!accepted) return;
     }
     props.onClose();
   };
+
+  const handleFileSelect = (path: string) =>
+    directoryEditor.setSelectedFile(path);
 
   return (
     <div className={classes.root}>
@@ -93,8 +109,8 @@ export function TemplateEditorBrowser(props: { onClose?: () => void }) {
           >
             <IconButton
               className={classes.button}
-              disabled={directoryEditor.files.every(file => !file.dirty)}
-              onClick={() => directoryEditor.save()}
+              disabled={!canSave}
+              onClick={handleSave}
             >
               <SaveIcon />
             </IconButton>
@@ -104,10 +120,7 @@ export function TemplateEditorBrowser(props: { onClose?: () => void }) {
               'templateEditorPage.templateEditorBrowser.reloadIconTooltip',
             )}
           >
-            <IconButton
-              className={classes.button}
-              onClick={() => directoryEditor.reload()}
-            >
+            <IconButton className={classes.button} onClick={handleReload}>
               <RefreshIcon />
             </IconButton>
           </Tooltip>
@@ -124,21 +137,16 @@ export function TemplateEditorBrowser(props: { onClose?: () => void }) {
         </div>
         <Divider className={classes.buttonsDivider} />
         <div className={classes.browserContainer}>
-          <FileBrowser
-            selected={directoryEditor.selectedFile?.path ?? ''}
-            onSelect={directoryEditor.setSelectedFile}
-            filePaths={directoryEditor.files.map(file => file.path)}
-          />
-          <AIChatComponent
-            containerStyle={{
-              width: '28%',
-              marginLeft: '48px',
-              position: 'fixed',
-              bottom: '16px',
-              right: '16px',
-              zIndex: 1000,
-            }}
-          />
+          <div className={classes.fileBrowser}>
+            <FileBrowser
+              selected={directoryEditor.selectedFile?.path ?? ''}
+              onSelect={handleFileSelect}
+              filePaths={directoryEditor.files.map(file => file.path)}
+            />
+          </div>
+          <div className={classes.chatComponent}>
+            <AIChatComponent directoryEditor={directoryEditor} />
+          </div>
         </div>
       </div>
     </div>

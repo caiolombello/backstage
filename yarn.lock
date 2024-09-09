@@ -4305,7 +4305,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/core-plugin-api@^1.8.2, @backstage/core-plugin-api@^1.9.3, @backstage/core-plugin-api@workspace:^, @backstage/core-plugin-api@workspace:packages/core-plugin-api":
+"@backstage/core-plugin-api@^1.0.0, @backstage/core-plugin-api@^1.8.2, @backstage/core-plugin-api@^1.9.3, @backstage/core-plugin-api@workspace:^, @backstage/core-plugin-api@workspace:packages/core-plugin-api":
   version: 0.0.0-use.local
   resolution: "@backstage/core-plugin-api@workspace:packages/core-plugin-api"
   dependencies:
@@ -4560,6 +4560,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@backstage/plugin-ai-chat-backend@^0.0.0, @backstage/plugin-ai-chat-backend@workspace:plugins/ai-chat-backend":
+  version: 0.0.0-use.local
+  resolution: "@backstage/plugin-ai-chat-backend@workspace:plugins/ai-chat-backend"
+  dependencies:
+    "@backstage/backend-common": "workspace:^"
+    "@backstage/backend-defaults": "workspace:^"
+    "@backstage/backend-plugin-api": "workspace:^"
+    "@backstage/backend-test-utils": "workspace:^"
+    "@backstage/cli": "workspace:^"
+    "@backstage/plugin-auth-backend": "workspace:^"
+    "@backstage/plugin-auth-backend-module-guest-provider": "workspace:^"
+    "@types/express": "*"
+    "@types/supertest": ^2.0.8
+    express: ^4.17.1
+    express-promise-router: ^4.1.0
+    msw: ^2.0.8
+    node-fetch: ^2.6.7
+    supertest: ^6.2.4
+  languageName: unknown
+  linkType: soft
+
 "@backstage/plugin-ai-chat@^0.0.0, @backstage/plugin-ai-chat@workspace:plugins/ai-chat":
   version: 0.0.0-use.local
   resolution: "@backstage/plugin-ai-chat@workspace:plugins/ai-chat"
@@ -4567,7 +4588,7 @@ __metadata:
     "@backstage/cli": "workspace:^"
     "@backstage/core-app-api": "workspace:^"
     "@backstage/core-components": "workspace:^"
-    "@backstage/core-plugin-api": "workspace:^"
+    "@backstage/core-plugin-api": ^1.0.0
     "@backstage/dev-utils": "workspace:^"
     "@backstage/test-utils": "workspace:^"
     "@backstage/theme": "workspace:^"
@@ -4579,6 +4600,7 @@ __metadata:
     "@testing-library/user-event": ^14.0.0
     msw: ^1.0.0
     react: ^16.13.1 || ^17.0.0 || ^18.0.0
+    react-syntax-highlighter: ^15.5.0
     react-use: ^17.2.4
   peerDependencies:
     react: ^16.13.1 || ^17.0.0 || ^18.0.0
@@ -26956,6 +26978,7 @@ __metadata:
     "@vitejs/plugin-react": ^4.0.4
     cross-env: ^7.0.0
     history: ^5.0.0
+    http-proxy-middleware: ^2.0.0
     react: ^18.0.2
     react-dom: ^18.0.2
     react-router: ^6.3.0
@@ -27039,6 +27062,7 @@ __metadata:
     "@backstage/backend-plugin-api": "workspace:^"
     "@backstage/catalog-model": "workspace:^"
     "@backstage/cli": "workspace:^"
+    "@backstage/plugin-ai-chat-backend": ^0.0.0
     "@backstage/plugin-app-backend": "workspace:^"
     "@backstage/plugin-auth-backend": "workspace:^"
     "@backstage/plugin-auth-backend-module-github-provider": "workspace:^"
@@ -40204,6 +40228,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root@workspace:."
   dependencies:
+    "@backstage/backend-plugin-api": "workspace:^"
     "@backstage/cli": "workspace:*"
     "@backstage/codemods": "workspace:*"
     "@backstage/create-app": "workspace:*"
