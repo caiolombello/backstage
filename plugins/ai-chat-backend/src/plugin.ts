@@ -33,7 +33,6 @@ export const aiChatPlugin = createBackendPlugin({
           logger,
           config,
         });
-        // Mudança aqui: remova o primeiro argumento '/api/ai-chat'
         httpRouter.use(router);
       },
     });

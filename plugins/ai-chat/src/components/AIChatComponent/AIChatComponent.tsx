@@ -33,7 +33,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useApi, errorApiRef } from '@backstage/core-plugin-api';
+import { useApi, errorApiRef, configApiRef } from '@backstage/core-plugin-api';
 
 interface DirectoryEditorFile {
   path: string;
@@ -98,12 +98,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     flex: 1,
     marginRight: theme.spacing(1),
   },
-  message: {
+  messageContainer: {
+    display: 'flex',
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1),
     maxWidth: '80%',
-    padding: theme.spacing(1, 2),
-    borderRadius: 16,
-    marginBottom: theme.spacing(1),
-    wordBreak: 'break-word',
   },
   userMessage: {
     alignSelf: 'flex-end',
@@ -112,25 +111,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: theme.palette.grey[200],
-    color: 'black',
+    backgroundColor: theme.palette.grey[100],
+    color: theme.palette.common.black,
   },
-  avatar: {
-    width: 32,
-    height: 32,
-    marginRight: theme.spacing(1),
-  },
-  messageContainer: {
+  messageContent: {
     display: 'flex',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing(1),
-  },
-  closeButton: {
-    padding: 0,
-    color: theme.palette.primary.contrastText,
-  },
-  sendButton: {
-    padding: theme.spacing(1),
+    flexDirection: 'column',
+    color: theme.palette.text.black,
   },
   codeBlock: {
     position: 'relative',
@@ -142,10 +129,22 @@ const useStyles = makeStyles((theme: Theme) => ({
     top: theme.spacing(1),
     right: theme.spacing(1),
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: theme.palette.common.white,
+    color: theme.palette.common.black,
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    marginRight: theme.spacing(1),
+  },
+  closeButton: {
+    padding: 0,
+    color: theme.palette.primary.contrastText,
+  },
+  sendButton: {
+    padding: theme.spacing(1),
   },
 }));
 
@@ -168,6 +167,7 @@ export const AIChatComponent: React.FC<{
   const [threadId, setThreadId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const errorApi = useApi(errorApiRef);
+  const configApi = useApi(configApiRef);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -191,9 +191,13 @@ export const AIChatComponent: React.FC<{
 
         let currentThreadId = threadId;
         if (!currentThreadId) {
-          const response = await fetch('/api/ai-chat/start-chat', {
-            method: 'POST',
-          });
+          const backendBaseUrl = configApi.getString('backend.baseUrl');
+          const response = await fetch(
+            `${backendBaseUrl}/api/ai-chat/start-chat`,
+            {
+              method: 'POST',
+            },
+          );
           if (!response.ok) {
             throw new Error(`Falha ao iniciar chat: ${response.statusText}`);
           }
@@ -202,7 +206,8 @@ export const AIChatComponent: React.FC<{
           setThreadId(currentThreadId);
         }
 
-        const response = await fetch('/api/ai-chat/chat', {
+        const backendBaseUrl = configApi.getString('backend.baseUrl');
+        const response = await fetch(`${backendBaseUrl}/api/ai-chat/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -227,7 +232,7 @@ export const AIChatComponent: React.FC<{
         setIsLoading(false);
       }
     },
-    [directoryEditor, threadId, errorApi],
+    [directoryEditor, threadId, errorApi, configApi],
   );
 
   const handleSend = useCallback(async () => {
@@ -303,7 +308,13 @@ export const AIChatComponent: React.FC<{
 
   const renderMessage = useCallback(
     (msg: Message, index: number) => (
-      <div key={index} className={classes.messageContainer}>
+      <Paper
+        key={index}
+        className={`${classes.messageContainer} ${
+          msg.sender === 'user' ? classes.userMessage : classes.aiMessage
+        }`}
+        elevation={1}
+      >
         {msg.sender === 'ai' && (
           <Avatar
             className={classes.avatar}
@@ -312,33 +323,38 @@ export const AIChatComponent: React.FC<{
             AI
           </Avatar>
         )}
-        <div
-          className={`${classes.message} ${
-            msg.sender === 'user' ? classes.userMessage : classes.aiMessage
-          }`}
-        >
-          {msg.isCode ? (
-            <div className={classes.codeBlock}>
-              <SyntaxHighlighter
-                language="javascript"
-                style={materialDark}
-                customStyle={{ maxHeight: '300px', overflow: 'auto' }}
-              >
-                {msg.text}
-              </SyntaxHighlighter>
-              <IconButton
-                className={classes.copyButton}
-                onClick={() => handleCopyCode(msg.text)}
-                size="small"
-              >
-                <FileCopyIcon fontSize="small" />
-              </IconButton>
-            </div>
-          ) : (
-            <Typography variant="body2">{msg.text}</Typography>
+        <div className={classes.messageContent}>
+          {msg.text.split('```').map((part, i) =>
+            i % 2 === 0 ? (
+              <Typography key={i} variant="body1" component="div">
+                {part.split('\n').map((line, j) => (
+                  <React.Fragment key={j}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                ))}
+              </Typography>
+            ) : (
+              <div key={i} className={classes.codeBlock}>
+                <SyntaxHighlighter
+                  language="javascript"
+                  style={materialDark}
+                  customStyle={{ margin: 0 }}
+                >
+                  {part.trim()}
+                </SyntaxHighlighter>
+                <IconButton
+                  className={classes.copyButton}
+                  onClick={() => handleCopyCode(part.trim())}
+                  size="small"
+                >
+                  <FileCopyIcon fontSize="small" />
+                </IconButton>
+              </div>
+            ),
           )}
         </div>
-      </div>
+      </Paper>
     ),
     [classes, handleCopyCode],
   );

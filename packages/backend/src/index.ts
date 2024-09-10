@@ -16,7 +16,7 @@
 
 import { createBackend } from '@backstage/backend-defaults';
 import { createBackendFeatureLoader } from '@backstage/backend-plugin-api';
-import aiChat from '@backstage/plugin-ai-chat-backend';
+import aiChatPlugin from '@backstage/plugin-ai-chat-backend';
 
 const backend = createBackend();
 
@@ -56,6 +56,6 @@ backend.add(searchLoader);
 backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
 backend.add(import('@backstage/plugin-signals-backend'));
 backend.add(import('@backstage/plugin-notifications-backend'));
-backend.add(aiChat);
+backend.add(aiChatPlugin);
 
 backend.start();

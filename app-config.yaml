@@ -51,7 +51,7 @@ backend:
     connection: ':memory:'
   cors:
     origin: http://localhost:3000
-    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    methods: [GET, POST, PUT, DELETE]
     credentials: true
   csp:
     connect-src: ["'self'", 'http:', 'https:']

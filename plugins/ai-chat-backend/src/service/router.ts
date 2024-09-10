@@ -93,7 +93,7 @@ export async function createRouter(
           name: 'VeeCode Platform AI',
           instructions:
             'Você é um assistente especializado na plataforma VeeCode.',
-          model: 'gpt-4',
+          model: 'ft:gpt-4o-2024-08-06:vertigo:platform:A1vY9cad',
         });
         logger.info(`Novo assistente criado: ${newAssistant.id}`);
         assistantId = newAssistant.id;
@@ -107,6 +107,7 @@ export async function createRouter(
   }
 
   router.post('/start-chat', async (_req, res) => {
+    console.log('Received request to /start-chat');
     try {
       logger.info('Iniciando chat...');
       const assistant = await getOrCreateAssistant();
@@ -143,12 +144,8 @@ export async function createRouter(
         'POST',
         {
           assistant_id: assistant,
-          tools: [
-            {
-              type: 'retrieval',
-            },
-          ],
-          additional_instructions: `Você é um assistente especializado na plataforma VeeCode. Você tem acesso ao conteúdo do template atual, que está disponível como contexto adicional. Use essas informações para fornecer respostas mais precisas e relevantes. Conteúdo do template:\n\n${templateContent}`,
+          // Removemos a especificação de ferramentas
+          instructions: `Você é um assistente especializado na plataforma VeeCode. Você tem acesso ao conteúdo do template atual, que está disponível como contexto adicional. Use essas informações para fornecer respostas mais precisas e relevantes. Conteúdo do template:\n\n${templateContent}`,
         },
       );
 

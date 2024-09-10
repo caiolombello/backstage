@@ -15,15 +15,12 @@
  */
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-module.exports = function (app) {
+module.exports = app => {
   app.use(
     '/api/ai-chat',
     createProxyMiddleware({
       target: 'http://localhost:7007',
       changeOrigin: true,
-      pathRewrite: {
-        '^/api/ai-chat': '/api/ai-chat', // remove o prefixo '/api' antes de encaminhar a solicitação
-      },
     }),
   );
 };
