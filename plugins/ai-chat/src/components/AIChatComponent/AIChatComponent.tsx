@@ -117,7 +117,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   messageContent: {
     display: 'flex',
     flexDirection: 'column',
-    color: theme.palette.text.black,
+    color: theme.palette.common.black,
   },
   codeBlock: {
     position: 'relative',
